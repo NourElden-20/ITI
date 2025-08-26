@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Lab 2 – Form Validation (JS only)</title>
+  <style>
+    :root {
+      --ok: #1f9d55;
+      --err: #e02424;
+      --muted: #6b7280;
+      --bg: #0f172a;
+      --card: #111827;
+      --input: #0b1220;
+      --ring: #374151;
+    }
+    body{font-family: system-ui,Segoe UI,Roboto,Arial,sans-serif;background:linear-gradient(180deg,#0b1220 0%,#0f172a 100%);min-height:100svh;margin:0;display:grid;place-items:center;color:#e5e7eb}
+    .container{width:min(780px,92vw);background:var(--card);border:1px solid #1f2937;border-radius:16px;padding:28px 22px;box-shadow:0 20px 60px rgba(0,0,0,.45)}
+    h1{font-size:clamp(18px,3.4vw,26px);margin:0 0 12px}
+    p.hint{color:var(--muted);margin-top:0}
+    form{display:grid;gap:16px}
+    .field{display:grid;gap:8px}
+    label{font-weight:600}
+    .control{display:flex;align-items:center;gap:10px}
+    input[type="text"], input[type="email"], input[type="password"], input[type="tel"], input[type="file"]{
+      width:100%;padding:12px 14px;border-radius:12px;border:1px solid var(--ring);background:var(--input);color:#f3f4f6;outline:none;transition:border-color .18s ease, box-shadow .18s ease
+    }
+    input:focus{border-color:#60a5fa;box-shadow:0 0 0 3px rgba(96,165,250,.25)}
+    .error{font-size:.9rem;color:var(--err);min-height:1.2em}
+    .ok{font-size:.9rem;color:var(--ok);min-height:1.2em}
+    .row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+    @media (max-width:680px){.row{grid-template-columns:1fr}}
+    .btns{display:flex;gap:10px;justify-content:flex-end;margin-top:6px}
+    button{padding:10px 16px;border-radius:12px;border:1px solid #1f2937;background:#1f2937;color:#fff;font-weight:600;cursor:pointer}
+    button.primary{background:#2563eb;border-color:#2563eb}
+    .summary{border:1px dashed #334155;border-radius:12px;padding:10px 12px;background:#0b1220}
+    .summary ul{margin:.25rem 0 0 1rem}
+    .badge{font-size:.8rem;color:#e5e7eb;border:1px solid #334155;padding:2px 8px;border-radius:999px}
+    .muted{color:#9ca3af}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <p class="hint">Requirements: <span class="badge">name</span> required+alpha, <span class="badge">email</span> required+email, <span class="badge">phone</span> optional + Egyptian mobile, <span class="badge">image</span> required (jpg/png/jpeg), <span class="badge">password</span> ≥ 8 with special char, <span class="badge">confirm</span> must match.</p>
+
+    <div id="summary" class="summary" hidden>
+      <strong>Submission blocked due to the following errors:</strong>
+      <ul id="summaryList"></ul>
+    </div>
+
+    <form id="registerForm" novalidate>
+      <div class="row">
+        <div class="field">
+          <label for="name">Name</label>
+          <input id="name" name="name" type="text" autocomplete="name" />
+          <div class="error" data-for="name"></div>
+        </div>
+        <div class="field">
+          <label for="email">Email</label>
+          <input id="email" name="email" type="email" autocomplete="email" />
+          <div class="error" data-for="email"></div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="field">
+          <label for="phone">Phone (EG) <span class="muted">— optional</span></label>
+          <input id="phone" name="phone" type="tel" autocomplete="tel" placeholder="01XXXXXXXXX" />
+          <div class="error" data-for="phone"></div>
+        </div>
+        <div class="field">
+          <label for="image">Image (jpg/png/jpeg)</label>
+          <input id="image" name="image" type="file" accept="image/*" />
+          <div class="error" data-for="image"></div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="field">
+          <label for="password">Password</label>
+          <input id="password" name="password" type="password" autocomplete="new-password" />
+          <div class="error" data-for="password"></div>
+        </div>
+        <div class="field">
+          <label for="confirm">Confirm Password</label>
+          <input id="confirm" name="confirm" type="password" autocomplete="new-password" />
+          <div class="error" data-for="confirm"></div>
+        </div>
+      </div>
+
+      <div class="btns">
+        <button type="button" id="fillDemo">Fill demo</button>
+        <button class="primary" type="submit">Submit</button>
+      </div>
+    </form>
+  </div>
+
+  <script>
+    // ---------- Helpers ----------
+    const $ = (sel, ctx=document) => ctx.querySelector(sel);
+    const $$ = (sel, ctx=document) => Array.from(ctx.querySelectorAll(sel));
+    const setError = (name, msg) => {
+      const el = document.querySelector(`.error[data-for="${name}"]`);
+      if (el) el.textContent = msg || "";
+    };
+    const clearAllErrors = () => $$('.error').forEach(e => e.textContent = "");
+
+    // ---------- Validators ----------
+    const reg = {
+      alpha: /^[\p{L}\s]+$/u,
+      email: /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/,
+      egMobile: /^01[0125][0-9]{8}$/,
+      imageExt: /\.(jpe?g|png)$/i,
+      special: /[^A-Za-z0-9]/
+    };
+
+    function validateName() {
+      const v = $('#name').value.trim();
+      if (!v) return setError('name', 'Name is required');
+      if (!reg.alpha.test(v)) return setError('name', 'Name must contain only letters and spaces');
+      setError('name', '');
+      return true;
+    }
+
+    function validateEmail() {
+      const v = $('#email').value.trim();
+      if (!v) return setError('email', 'Email is required');
+      if (!reg.email.test(v)) return setError('email', 'Invalid email format');
+      setError('email', '');
+      return true;
+    }
+
+    function validatePhone() {
+      const v = $('#phone').value.trim();
+      if (!v) { setError('phone', ''); return true; }
+      if (!reg.egMobile.test(v)) return setError('phone', 'Invalid Egyptian phone number: must start with 010/011/012/015 and be 11 digits');
+      setError('phone', '');
+      return true;
+    }
+
+    function validateImage() {
+      const input = $('#image');
+      const file = input.files && input.files[0];
+      if (!file) return setError('image', 'Image is required');
+      const okType = ['image/jpeg','image/png','image/jpg'].includes(file.type);
+      const okExt = reg.imageExt.test(file.name);
+      if (!okType || !okExt) return setError('image', 'Only jpg, jpeg, png allowed');
+      setError('image', '');
+      return true;
+    }
+
+    function validatePassword() {
+      const v = $('#password').value;
+      if (v.length < 8) return setError('password', 'Minimum 8 characters');
+      if (!reg.special.test(v)) return setError('password', 'Must contain at least one special character');
+      setError('password', '');
+      return true;
+    }
+
+    function validateConfirm() {
+      const p = $('#password').value;
+      const c = $('#confirm').value;
+      if (!c) return setError('confirm', 'Please confirm password');
+      if (p !== c) return setError('confirm', 'Passwords do not match');
+      setError('confirm', '');
+      return true;
+    }
+
+    $('#name').addEventListener('blur', validateName);
+    $('#email').addEventListener('blur', validateEmail);
+    $('#phone').addEventListener('blur', validatePhone);
+    $('#image').addEventListener('change', validateImage);
+    $('#password').addEventListener('input', () => { validatePassword(); validateConfirm(); });
+    $('#confirm').addEventListener('input', validateConfirm);
+
+    $('#registerForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      clearAllErrors();
+      const checks = [validateName, validateEmail, validatePhone, validateImage, validatePassword, validateConfirm];
+      const results = checks.map(fn => fn());
+
+      const summary = $('#summary');
+      const list = $('#summaryList');
+      list.innerHTML = '';
+
+      $$('.error').forEach(er => {
+        if (er.textContent.trim()) {
+          const li = document.createElement('li');
+          li.textContent = er.textContent;
+          list.appendChild(li);
+        }
+      });
+
+      const isValid = results.every(Boolean) && list.children.length === 0;
+      summary.hidden = isValid;
+
+      if (isValid) {
+        alert('✅ All good! Form is valid (JS validation only).');
+      } else {
+        summary.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    });
+
+    $('#fillDemo').addEventListener('click', () => {
+      $('#name').value = 'Ahmed Ali';
+      $('#email').value = 'ahmed@example.com';
+      $('#phone').value = '01123456789';
+      $('#password').value = 'Secret@123';
+      $('#confirm').value = 'Secret@123';
+      [validateName, validateEmail, validatePhone, validatePassword, validateConfirm].forEach(fn => fn());
+    });
+  </script>
+</body>
+</html>
