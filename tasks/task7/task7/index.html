@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lab 1</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <h1>lab 1</h1>
+
+  <div class="controls" role="group" aria-label="Controls">
+    <input id="nameInput" class="input" type="text" placeholder="Ali" autocomplete="off" />
+    <input id="imageInput" class="input" type="text" placeholder="image.jpg أو image.png" autocomplete="off" />
+    <span id="imageError" class="error" aria-live="polite"></span>
+    <select id="fontSelect" aria-label="Font family">
+      <option value="Arial, Helvetica, sans-serif">Arial</option>
+      <option value="'Times New Roman', Times, serif">Times New Roman</option>
+      <option value="Georgia, serif">Georgia</option>
+      <option value="'Courier New', Courier, monospace">Courier New</option>
+      <option value="Tahoma, sans-serif">Tahoma</option>
+      <option value="Verdana, Geneva, Tahoma, sans-serif">Verdana</option>
+    </select>
+    <button id="incBtn" class="btn" title="Increase font size">+</button>
+    <button id="decBtn" class="btn" title="Decrease font size">-</button>
+    <button id="showBtn" class="btn">click</button>
+    <span class="sizeInfo" id="sizeInfo" aria-live="polite"></span>
+  </div>
+
+  <div id="displayArea">
+    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+      <div id="greeting" aria-live="polite"></div>
+      <span id="nameHint">if valid name</span>
+      <span id="nameError" class="error">name must be char</span>
+    </div>
+    <img id="preview" alt="Preview" />
+    <div id="mover" title="Move until window inner width">+</div>
+  </div>
+
+  <script defer src="app.js"></script>
+</body>
+</html>
+
