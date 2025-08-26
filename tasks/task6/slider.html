@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Image Slider</title>
+    <style>
+        #slider {
+            width: 400px;
+            height: 300px;
+            border: 1px solid #ccc;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        img {
+            max-width: 100%;
+            max-height: 100%;
+        }
+    </style>
+</head>
+<body>
+    <div id="slider">
+        <img id="slideImg" src="img1.jpg" alt="slider">
+    </div>
+    <button onclick="startSlider()">Start</button>
+    <button onclick="stopSlider()">Stop</button>
+
+    <script>
+        const images = ["img1.jpg", "img2.jpg", "img3.jpg", "img4.jpg"]; // ضع أسماء الصور هنا
+        let current = 0;
+        let intervalId = null;
+
+        function showImage(index) {
+            document.getElementById("slideImg").src = images[index];
+        }
+
+        function startSlider() {
+            if (intervalId) return; 
+            intervalId = setInterval(function() {
+                current = (current + 1) % images.length;
+                showImage(current);
+            }, 1500); 
+        }
+
+        function stopSlider() {
+            clearInterval(intervalId);
+            intervalId = null;
+        }
+    </script>
+</body>
+</html>
