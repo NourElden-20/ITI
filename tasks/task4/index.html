@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>JS Tasks</title>
+    <script src="external.js"></script> <!-- External JS for Task 2 -->
+</head>
+<body>
+
+    <h1 id="welcomeText"></h1>
+
+    <!-- مكان عرض نتيجة جمع الرقمين -->
+    <p id="sumResult"></p>
+
+    <!-- Button for Task 2 -->
+    <button onclick="taskTwo()">Add Two Numbers</button>
+
+    <!-- Button for Task 3 -->
+    <button onclick="taskThree()">Evaluate Math Expression</button>
+
+    <script>
+        // -------- Part 1 --------
+        alert("Welcome to my site");
+        let userName = prompt("Please enter your name:");
+        document.getElementById("welcomeText").innerText = "Welcome " + userName;
+
+        // -------- Part 2 (calling external function) --------
+        function taskTwo() {
+            let num1 = parseFloat(prompt("Enter the first number:"));
+            let num2 = parseFloat(prompt("Enter the second number:"));
+            let result = addTwoNumbers(num1, num2); // function from external.js
+            document.getElementById("sumResult").innerText =
+                "The sum of " + num1 + " and " + num2 + " is: " + result;
+        }
+
+        // -------- Part 3 --------
+        function taskThree() {
+            let expression = prompt("Enter a math expression (e.g., 3+4*5):");
+            let result = evalExpression(expression);
+            alert(`You entered: ${expression}, and the result is: ${result}`);
+        }
+
+        function evalExpression(expr) {
+            return eval(expr); // eval executes the string as JS code
+        }
+    </script>
+</body>
+</html>
